@@ -56,11 +56,9 @@ class NumberFormatter
         } else if ($stringNumber >= 1000 and $stringNumber < 99950) {
             $stringNumber = substr_replace($stringNumber, ' ', strlen($stringNumber) - 3, 0);
         } else if ($stringNumber >= 100000 and $stringNumber < 999500) {
-            substr($stringNumber, 3, 1) > 4 ? $stringNumber = $stringNumber + 1000 : null;
-            $stringNumber = substr($stringNumber, 0, 3) . 'K';
+            $stringNumber = $this->roundOff($stringNumber, 3).'K';
         } else if ($stringNumber >= 1000000) {
-            substr($stringNumber, strlen($stringNumber) - 4, 1) > 4 ? $stringNumber = $stringNumber + 10000 : null;
-            $stringNumber = substr($stringNumber, 0, strlen($stringNumber) - 4) . 'M';
+            $stringNumber = $this->roundOff($stringNumber, 4).'M';
             $stringNumber = substr_replace($stringNumber, '.', strlen($stringNumber) - 3, 0);
         }
 
@@ -70,5 +68,16 @@ class NumberFormatter
         $isNegative ? $stringNumber = '-' . $stringNumber : null;
 
         return $stringNumber;
+    }
+
+    public function roundOff($number, $circles) {
+        for ($i = 0; $i < $circles; $i = $i + 1) {
+            if (substr($number, strlen($number) - 1, 1) > 4) {
+                $number = substr($number, 0, strlen($number) - 1) + 1;
+            } else {
+                $number = substr($number, 0, strlen($number) - 1);
+            }
+        }
+        return $number;
     }
 }
