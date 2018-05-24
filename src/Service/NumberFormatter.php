@@ -13,71 +13,37 @@ class NumberFormatter
 {
     public function format(float $number)
     {
-        $hasComma = false;
+        if($number > PHP_FLOAT_MAX) return "This number is too big for float to handle correctly";
 
-        if ($number < 0) {
-            $stringNumber = ltrim((string)$number, '-');
-            $isNegative = true;
-        } else {
-            $stringNumber = (string)$number;
-            $isNegative = false;
-        }
+        $hasComma = false;
+        $isNegative = true;
+        $stringNumber = number_format($number, 2, '.', '');
+
+        $number < 0
+            ? $stringNumber = ltrim((string)$number, '-')
+            : $isNegative = false;
 
         if (preg_match('/\./', $stringNumber)) {
-            $hasComma = true;
             $afterComma = substr($stringNumber, strpos($stringNumber, '.'));
-            while (strlen($afterComma) > 3) {
-                if (substr($afterComma, strlen($afterComma) - 1, 1) > 4) {
-                    $afterComma = '.'.(substr($afterComma, 1, strlen($afterComma) - 2) + 1);
-                    if(preg_match("/^.1[0]+$/", $afterComma)) {
-                        $stringNumber = $stringNumber + 1;
-                        $hasComma = false;
-                        break;
-                    }
-                } else {
-                    $afterComma = '.'.substr($afterComma, 1, strlen($afterComma) - 2);
-                }
-            }
-            if (strlen($afterComma) === 2) {
-                $afterComma = $afterComma . '0';
-            }
+            $hasComma = true;
+            strlen($afterComma) === 2 ? $afterComma .= '0' : null;
             $stringNumber = substr($stringNumber, 0, strpos($stringNumber, '.'));
-            $beforeComma = $stringNumber;
-            if (substr($afterComma, 1, 1) > 4 and strlen($stringNumber) > 3) {
-                $stringNumber = $stringNumber + 1;
-                $hasComma = false;
-            }
+            (substr($afterComma, 1, 1) > 4 and strlen($stringNumber) > 3) ? ($stringNumber += 1 AND $hasComma = false) : null;
+            ($afterComma === ".00" OR strlen($stringNumber) > 3) ? $hasComma = false : null;
         }
 
-        if ($stringNumber >= 99950 and $stringNumber < 100000) {
-            $stringNumber = "100K";
-        } else if ($stringNumber >= 999500 and $stringNumber < 1000000) {
-            $stringNumber = "1.00M";
-        } else if ($stringNumber >= 1000 and $stringNumber < 99950) {
+        if ($stringNumber >= 1000 and $stringNumber < 99950) {
             $stringNumber = substr_replace($stringNumber, ' ', strlen($stringNumber) - 3, 0);
-        } else if ($stringNumber >= 100000 and $stringNumber < 999500) {
-            $stringNumber = $this->roundOff($stringNumber, 3).'K';
-        } else if ($stringNumber >= 1000000) {
-            $stringNumber = $this->roundOff($stringNumber, 4).'M';
-            $stringNumber = substr_replace($stringNumber, '.', strlen($stringNumber) - 3, 0);
+        } else if ($stringNumber >= 99950 and $stringNumber < 999500) {
+            $stringNumber = round(($stringNumber/1000),0).'K';
+        } else if ($stringNumber >= 999500) {
+            $stringNumber = round(($stringNumber/1000000),2).'M';
+            $stringNumber === "1M" ? $stringNumber = "1.00M" : null;
         }
 
-        if ($hasComma and strlen($beforeComma) < 4) {
-            $stringNumber = $stringNumber . substr($afterComma, 0, 3);
-        }
+        $hasComma ? $stringNumber .= substr($afterComma, 0, 3) : null;
         $isNegative ? $stringNumber = '-' . $stringNumber : null;
 
         return $stringNumber;
-    }
-
-    public function roundOff($number, $circles) {
-        for ($i = 0; $i < $circles; $i = $i + 1) {
-            if (substr($number, strlen($number) - 1, 1) > 4) {
-                $number = substr($number, 0, strlen($number) - 1) + 1;
-            } else {
-                $number = substr($number, 0, strlen($number) - 1);
-            }
-        }
-        return $number;
     }
 }
