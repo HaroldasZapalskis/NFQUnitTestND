@@ -35,7 +35,7 @@ class NumberFormatter
                         break;
                     }
                 } else {
-                    $afterComma = substr($afterComma, 1, strlen($afterComma) - 1);
+                    $afterComma = '.'.substr($afterComma, 1, strlen($afterComma) - 2);
                 }
             }
             if (strlen($afterComma) === 2) {
