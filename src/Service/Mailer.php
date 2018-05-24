@@ -1,7 +1,7 @@
 <?php
 
 
-namespace AppBundle\Service;
+namespace App\Service;
 
 
 class Mailer
